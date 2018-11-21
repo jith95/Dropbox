@@ -16,6 +16,7 @@ def clientConnect(hostStr, portStr):
 	# port = 5555
 
 	host = hostStr
+	
 	port = portStr
 
 	# clientSocket.connect((host, port))
