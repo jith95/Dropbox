@@ -13,7 +13,9 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
 
     while clientActive:
         client_input = receive_input(connection, max_buffer_size)
+
         if "--QUIT--" in client_input:
+            
 			print("Client is requesting to quit")
             connection.close()
             print("Connection " + ip + ":" + port + " closed")
