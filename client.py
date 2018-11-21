@@ -34,7 +34,7 @@ def clientConnect(hostStr, portStr):
 
 
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
-clientConnect(str(sys.argv[1]), int(sys.argv[2]))
+clientConnect('localhost',5555)
 
 
 
