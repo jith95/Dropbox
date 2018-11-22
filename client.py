@@ -6,9 +6,7 @@ import sys
 def clientConnect(hostStr, portStr):
 
 	#create socket object
-	clientSocket = socket.socket(
-		socket.AF_INET,
-		socket.SOCK_STREAM)
+	clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
 	#host address
 	# host = '10.1.139.91'
@@ -16,7 +14,6 @@ def clientConnect(hostStr, portStr):
 	# port = 5555
 
 	host = hostStr
-	
 	port = portStr
 
 	# clientSocket.connect((host, port))
@@ -26,12 +23,23 @@ def clientConnect(hostStr, portStr):
 		print("Connection error")
 		sys.exit()	
 
+	print("Enter 'quit' to exit")
+
 	#Receive 1024 B of data
 	tm = clientSocket.recv(1024)
+
+	print (tm.decode("utf8"))
+
+	message = input(" -> ")
+
+	while message.lower() != 'quit':
+		clientSocket.sendall(message.encode("utf8"))
+		if clientSocket.recv(5120).decode("utf8") == "-":
+			pass        # null operation
+
+		message = input(" -> ")
+	clientSocket.sendall(message.encode("utf-8"))
 	clientSocket.close()
-
-	print (tm.decode('ascii'))
-
 
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
 clientConnect(str(sys.argv[1]), int(sys.argv[2]))
