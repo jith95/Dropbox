@@ -6,7 +6,7 @@ if welcome == "n":
         password  = input("Enter a password:")
         password1 = input("Confirm password:")
         if password == password1:
-            file = open(".txt", "w")
+            file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "a+")
             file.write(username+":"+password)
             file.close()
             welcome = "y"
@@ -17,9 +17,10 @@ if welcome == "y":
     while True:
         login1 = input("Login:")
         login2 = input("Password:")
-        file = open(login1+".txt", "r")
+        file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "r")
         data   = file.readline()
         file.close()
+        print(data)
         if data == login1+":"+login2:
             print("Welcome")
             break
