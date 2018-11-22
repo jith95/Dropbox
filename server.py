@@ -51,9 +51,9 @@ def process_input(input_str):
 
 # MAIN PROGRAM
 
-#socket object
-serverSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#socket data object
+serverDataSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+serverDataSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # SO_REUSEADDR flag tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
 
 # host = socket.gethostname()
@@ -61,13 +61,21 @@ host = ''
 port = 5555
 
 #bind to the port
-serverSocket.bind((host, port))
+serverDataSocket.bind((host, port))
+serverDataSocket.listen(4)
 
-serverSocket.listen(4)
+
+#socket command object
+serverCmdSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+serverCmdSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+port = 5556
+serverCmdSocket.bind((host, port))
+serverCmdSocket.listen(4)
+
 
 while True:
 	#establish connection
-	clientSocket, addr = serverSocket.accept()
+	clientSocket, addr = serverDataSocket.accept()
 	ip, port = str(addr[0]), str(addr[1])
 
 	print ("Got a connection from : ", str(addr))
