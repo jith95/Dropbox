@@ -124,11 +124,11 @@ def menu(connection, max_buffer_size):
         if(choice==6):
             showlog()
         if(choice==7):
-            toBePrinted = "Thank You"
+            toBePrinted = "Thank You "
             connection.sendall(toBePrinted.encode("utf8"))
             return 'quit'
         if(choice>7 or choice<1):
-            toBePrinted = "Incorrect Choice"
+            toBePrinted = "Incorrect Choice \n"
             connection.sendall(toBePrinted.encode("utf8"))
 
 
