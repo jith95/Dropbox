@@ -6,6 +6,7 @@ import os
 import sys
 import traceback
 from threading import Thread
+import select
 
 # Thread for every new clinet
 def client_thread(connection, ip, port, max_buffer_size = 5120):
@@ -51,18 +52,20 @@ def process_input(input_str):
 
 # MAIN PROGRAM
 
+
+serverSockets = []
+
 #socket data object
 serverDataSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 serverDataSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # SO_REUSEADDR flag tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
-
 # host = socket.gethostname()
 host = ''
 port = 5555
-
 #bind to the port
 serverDataSocket.bind((host, port))
 serverDataSocket.listen(4)
+serverSockets.append(serverDataSocket)
 
 
 #socket command object
@@ -71,24 +74,30 @@ serverCmdSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 port = 5556
 serverCmdSocket.bind((host, port))
 serverCmdSocket.listen(4)
+serverSockets.append(serverCmdSocket)
 
 
 while True:
-	#establish connection
-	clientSocket, addr = serverDataSocket.accept()
-	ip, port = str(addr[0]), str(addr[1])
+    # Wait for any sockets to get a hook
+    readable, _, _ = select.select(serverSockets, [], [])
+    ready_server = readable[0]
 
-	print ("Got a connection from : ", str(addr))
-	message = "Connected :: "
-	currentTime = time.ctime(time.time()) + "\n"
+    # establish connection
+    clientSocket, addr = ready_server.accept()
+    ip, port = str(addr[0]), str(addr[1])
+    workingPort = ready_server.getsockname()[1]
 
-	message += currentTime
-	clientSocket.send(message.encode("utf8"))
+    print ("Got a connection from : ", str(addr))
+    message = "Connected :: "
+    currentTime = time.ctime(time.time()) + "\n"
 
-	try:
-		Thread(target=client_thread, args=(clientSocket, ip, port)).start()
-	except:
-		print("Thread error")
-		traceback.print_exc()
+    message += currentTime
+    clientSocket.send(message.encode("utf8"))
 
-	# clientSocket.close()
+    try:
+        Thread(target=client_thread, args=(clientSocket, ip, port)).start()
+    except:
+        print("Thread error")
+        traceback.print_exc()
+
+    # clientSocket.close()
