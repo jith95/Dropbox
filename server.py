@@ -11,56 +11,67 @@ import select
 
 
 
+def listfile():
+    pass
+def uploadfile():
+    pass
+def downloadfile():
+    pass
+def deletefile():
+    pass
+def sharefile():
+    pass
+def showlog():
+    pass
 
 
 
 
+def signup(connection, max_buffer_size):
+    s=1
+    username = ''
+    while s:
+        toBePrinted = "Enter a username: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        username = receive_input(connection, max_buffer_size)        
+        s=0
+        for i in d:
+                if i==username:
+                    toBePrinted = "Username already exists! Choose a new one "
+                    connection.sendall(toBePrinted.encode("utf8"))
+                    s=1
+                    break
+    while True:
 
-def menu():
-    d = {}
-    with open(r"Users.txt") as f:
-    #with open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt") as f:
-        for line in f:
-           (key, val) = line.split()
-           d[key] = val
-    def listfile():
-        pass
-    def uploadfile():
-        pass
-    def downloadfile():
-        pass
-    def deletefile():
-        pass
-    def sharefile():
-        pass
-    def showlog():
-        pass
-    def signup():
-        s=1
-        while s:
-            username  = input("Enter a username:")
-            s=0
-            for i in d:
-                    if i==username:
-                        print("Username already exists! Choose a new one")
-                        s=1
-        while True:
-            password  = getpass.getpass("Enter a password:")
-            password2 = getpass.getpass("Confirm password:")
-            if password == password2:
-                #file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "a+")
-                file = open(r"Users.txt", "a+")
-                file.write(username+" "+password+"\n")
-                file.close()
-                break
-            print("Passwords don't match!")
-    def login():
+        toBePrinted = "Enter a password: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        password = receive_input(connection, max_buffer_size)
+
+        toBePrinted = "Confirm password: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        password2 = receive_input(connection, max_buffer_size) 
+
+        if password == password2:
+            d[username]=password            
+            break
+        toBePrinted = "Passwords don't match "
+        connection.sendall(toBePrinted.encode("utf8"))
+
+
+
+
+def login(connection, max_buffer_size):
         s=0
         while True:
-            username = input("Login:")
-            password = input("Password:")
-            #file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "r")
-            file = open(r"Users.txt", "r")
+
+            toBePrinted = "Enter userid: "
+            connection.sendall(toBePrinted.encode("utf8"))
+            username = receive_input(connection, max_buffer_size) 
+
+            toBePrinted = "Enter password: "
+            connection.sendall(toBePrinted.encode("utf8"))
+            password = receive_input(connection, max_buffer_size)
+
             for i in d:
                 if i==username and d[i]==password:
                     s=1
@@ -68,29 +79,38 @@ def menu():
             if s==1:
                 break    
             else:
-                print("Incorrect Password!")
+                toBePrinted = "The userid password combination doesn't match "
+                connection.sendall(toBePrinted.encode("utf8"))
                 
 
-    print("Welcome...")
+
+
+
+
+
+def menu(connection, max_buffer_size):
+   
+    toBePrinted = "Welcome...\n1.Sign up\n2.Sign in\nEnter your choice(1-2): "
+
     while 1:
-        welcome = int(input("1.Sign up\n2.Sign in\nEnter your choice(1-2): "))
-        if welcome == 1:
-            signup()
+        connection.sendall(toBePrinted.encode("utf8"))
+        print(toBePrinted)
+        client_input = int(receive_input(connection, max_buffer_size))
+        if client_input == 1:
+            signup(connection, max_buffer_size)
             break
-        if welcome == 2:
-            login()
+        if client_input == 2:
+            login(connection, max_buffer_size)
             break
-        if welcome>2 or welcome<1:
-            print("Incorrect Choice")
+        if client_input>2 or client_input<1:
+            toBePrinted = "Incorrect Choice"
+            connection.sendall(toBePrinted.encode("utf8"))
+
     while 1:
-        print("\n1.List files:")
-        print("\n2.Upload files:")
-        print("\n3.Download files:")
-        print("\n4.Delete files:")
-        print("\n5.Share files:")
-        print("\n6.Show log:")
-        print("\n7.Sign out:")
-        choice=int(input("Enter choice(1-7): "))
+        toBePrinted = "\n1.List files:\n2.Upload Files:\n3.Download files:\n4.Delete files:\n5.Share files:\n6.Show log:\n7.Sign out:\nEnter choice(1-7): "
+        connection.sendall(toBePrinted.encode("utf8"))
+        choice = int(receive_input(connection, max_buffer_size))
+
         if(choice==1):
             listfile()
         if(choice==2):
@@ -104,11 +124,12 @@ def menu():
         if(choice==6):
             showlog()
         if(choice==7):
-            print("Thank you")
+            toBePrinted = "Thank You"
+            connection.sendall(toBePrinted.encode("utf8"))
             return 'quit'
         if(choice>7 or choice<1):
-            print("Incorrect choice")
-
+            toBePrinted = "Incorrect Choice"
+            connection.sendall(toBePrinted.encode("utf8"))
 
 
 
@@ -119,22 +140,26 @@ def menu():
 
 # Thread for every new clinet
 def client_thread(connection, ip, port, max_buffer_size = 5120):
-    clientActive = True
+    # clientActive = True
+    # client_input = menu(connection, max_buffer_size)
 
-    while clientActive:
-        menu()
-        client_input = receive_input(connection, max_buffer_size)
+    # while clientActive:
+        # client_input = receive_input(connection, max_buffer_size)
 
-        # print ("Client Input : " , client_input)
+        # if client_input.lower() == 'quit':
+        #     print("Client is requesting to quit")
+        #     connection.close()
+        #     print("Connection " + ip + ":" + port + " closed")
+        #     clientActive = False
+        # else:
+        #     print("Processed result: {}".format(client_input))
+        #     connection.sendall("-".encode("utf8"))    
 
-        if client_input.lower() == 'quit':
-            print("Client is requesting to quit")
-            connection.close()
-            print("Connection " + ip + ":" + port + " closed")
-            clientActive = False
-        else:
-            print("Processed result: {}".format(client_input))
-            connection.sendall("-".encode("utf8"))
+    menu(connection, max_buffer_size);
+    print("Client is requesting to quit")
+    connection.close()
+    print("Connection " + ip + ":" + port + " closed")
+
 
 
 # Parses the input received from client
@@ -161,6 +186,16 @@ def process_input(input_str):
 
 
 # MAIN PROGRAM
+
+
+#setting up a dictionary from users.txt
+
+d = {}
+with open(r"Users.txt") as f:
+#with open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt") as f:
+    for line in f:
+       (key, val) = line.split()
+       d[key] = val
 
 
 serverSockets = []
@@ -209,5 +244,14 @@ while True:
     except:
         print("Thread error")
         traceback.print_exc()
+
+
+
+#dump the dictionary into the file
+
+'''file = open(r"Users.txt", "a+")
+file.write(username+" "+password+"\n")
+file.close()'''
+
 
     # clientSocket.close()

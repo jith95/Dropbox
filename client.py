@@ -3,21 +3,16 @@
 import socket
 import sys
 import getpass
+
+
 def clientConnect(hostStr, dataPort, cmdPort):
 
     #create socket object
     clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-
-    #host address
-    # host = '10.1.139.91'
-
-    # port = 5555
-
     host = hostStr
     # Connecting to cmdPort first
     port = cmdPort
 
-    # clientSocket.connect((host, port))
     try:
         clientSocket.connect((host, port))
     except:
@@ -26,21 +21,33 @@ def clientConnect(hostStr, dataPort, cmdPort):
 
     print("Enter 'quit' to exit")
 
-    #Receive 1024 B of data
-    tm = clientSocket.recv(1024)
-
+    #Receive 5120B of data
+    tm = clientSocket.recv(5120)
     print (tm.decode("utf8"))
 
-    message = 's'
+    message = ''
+    #use getpass function for entering a password
+
+
 
     while message.lower() != 'quit':
+        toBePrinted = clientSocket.recv(5120).decode("utf8")
+        print(toBePrinted)
+        
+        if (toBePrinted == "Enter a password: " or toBePrinted == "Confirm password: "):
+            message = getpass.getpass()
+        else:
+            message = input()
+        
         clientSocket.sendall(message.encode("utf8"))
-        if clientSocket.recv(5120).decode("utf8") == "-":
-            pass        # null operation
-        message = menu()
-    clientSocket.sendall(message.encode("utf-8"))
+
     clientSocket.close()
 
+
+
+
+
+# Main Function
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
 dataPort= input("Enter dataPort : ")
 cmdPort = input("Enter commandPort : ")
