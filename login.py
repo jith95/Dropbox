@@ -1,6 +1,7 @@
 def menu():
     d = {}
-    with open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt") as f:
+    with open(r"Users.txt") as f:
+    #with open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt") as f:
         for line in f:
            (key, val) = line.split()
            d[key] = val
@@ -24,8 +25,8 @@ def menu():
             password  = input("Enter a password:")
             password1 = input("Confirm password:")
             if password == password1:
-                file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "a+")
-                #file = open(r"file.txt", "a+")
+                #file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "a+")
+                file = open(r"Users.txt", "a+")
                 file.write(username+" "+password+"\n")
                 file.close()
                 welcome = "y"
@@ -36,8 +37,8 @@ def menu():
         while True:
             login1 = input("Login:")
             login2 = input("Password:")
-            file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "r")
-            #file = open(r"file.txt", "r")
+            #file = open(r"C:\Users\SREEJITH\Desktop\IITGN\DB\Database.txt", "r")
+            file = open(r"Users.txt", "r")
             for i in d:
                 if i==login1 and d[i]==login2:
                     s=1
