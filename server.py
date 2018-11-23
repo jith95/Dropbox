@@ -14,9 +14,10 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
     while clientActive:
         client_input = receive_input(connection, max_buffer_size)
 
-        if "--QUIT--" in client_input:
-            
-			print("Client is requesting to quit")
+        # print ("Client Input : " , client_input)
+
+        if client_input.lower() == 'quit':
+            print("Client is requesting to quit")
             connection.close()
             print("Connection " + ip + ":" + port + " closed")
             clientActive = False
@@ -41,7 +42,7 @@ def receive_input(connection, max_buffer_size):
 # Processes the input received from client
 def process_input(input_str):
     print("Processing the input received from client")
-    return "Hello " + str(input_str).upper()
+    return str(input_str)
 
 
 
@@ -74,7 +75,7 @@ while True:
 	currentTime = time.ctime(time.time()) + "\n"
 
 	message += currentTime
-	clientSocket.send(message.encode('ascii'))
+	clientSocket.send(message.encode("utf8"))
 
 	try:
 		Thread(target=client_thread, args=(clientSocket, ip, port)).start()
@@ -82,4 +83,4 @@ while True:
 		print("Thread error")
 		traceback.print_exc()
 
-	clientSocket.close()
+	# clientSocket.close()
