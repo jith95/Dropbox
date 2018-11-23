@@ -3,7 +3,7 @@
 import socket
 import sys
 
-def clientConnect(hostStr, portStr):
+def clientConnect(hostStr, dataPort, cmdPort):
 
 	#create socket object
 	clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -14,7 +14,8 @@ def clientConnect(hostStr, portStr):
 	# port = 5555
 
 	host = hostStr
-	port = portStr
+	# Connecting to cmdPort first
+	port = cmdPort
 
 	# clientSocket.connect((host, port))
 	try:
@@ -42,8 +43,8 @@ def clientConnect(hostStr, portStr):
 	clientSocket.close()
 
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
-clientConnect(str(sys.argv[1]), int(sys.argv[2]))
-
-
+dataPort= input("Enter dataPort : ")
+cmdPort = input("Enter commandPort : ")
+clientConnect(str(sys.argv[1]), int(dataPort), int(cmdPort))
 
 #python client.py 10.1.130.250
