@@ -9,19 +9,43 @@ from threading import Thread
 import select
 
 
-def makeFolder(foldername):
-    if not os.path.exists(foldername):
+def makeFolder(username):
+    if not os.path.exists(username):
         print ("new folder for new user ---- OASIS success")
-        os.makedirs(foldername)
+        os.makedirs(username)
 
-def listfile():
-    pass
+def listfile(connection,username):
+    path=os.getcwd()+'\\'+username
+    templist = os.listdir(path)
+    toBePrinted=''
+    for i in templist:
+        toBePrinted = toBePrinted+'\n'+i
+    connection.sendall(toBePrinted.encode("utf8"))
+
 def uploadfile():
     pass
+
 def downloadfile():
     pass
-def deletefile():
-    pass
+
+def deletefile(connection,max_buffer_size,username):
+    listfile(connection,username)
+    toBePrinted = "Enter file to be deleted: "
+    connection.sendall(toBePrinted.encode("utf8"))
+    filename = receive_input(connection, max_buffer_size)
+    path=os.getcwd()
+    if os.name == 'nt':
+        r= path+'\\'+username+'\\'+filename
+    else:
+        r= path+'/'+username+'/'+filename
+    if os.path.exists(r):
+        os.remove(r)
+        toBePrinted = filename + " Has been deleted"
+        connection.sendall(toBePrinted.encode("utf8"))
+    else:
+        toBePrinted = "File doen't exist "
+        connection.sendall(toBePrinted.encode("utf8"))
+
 def sharefile():
     pass
 def showlog():
@@ -62,32 +86,31 @@ def signup(connection, max_buffer_size):
         connection.sendall(toBePrinted.encode("utf8"))
 
 
-
+    return username
 
 def login(connection, max_buffer_size):
-        s=0
-        while True:
+    s=0
+    while True:
 
-            toBePrinted = "Enter userid: "
+        toBePrinted = "Enter userid: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        username = receive_input(connection, max_buffer_size) 
+
+        toBePrinted = "Enter password: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        password = receive_input(connection, max_buffer_size)
+
+        for i in d:
+            if i==username and d[i]==password:
+                s=1
+                break
+        if s==1:
+            break    
+        else:
+            toBePrinted = "The userid password combination doesn't match "
             connection.sendall(toBePrinted.encode("utf8"))
-            username = receive_input(connection, max_buffer_size) 
-
-            toBePrinted = "Enter password: "
-            connection.sendall(toBePrinted.encode("utf8"))
-            password = receive_input(connection, max_buffer_size)
-
-            for i in d:
-                if i==username and d[i]==password:
-                    s=1
-                    break
-            if s==1:
-                break    
-            else:
-                toBePrinted = "The userid password combination doesn't match "
-                connection.sendall(toBePrinted.encode("utf8"))
                 
-
-
+    return username
 
 
 
@@ -100,10 +123,10 @@ def menu(connection, max_buffer_size):
         connection.sendall(toBePrinted.encode("utf8"))
         client_input = int(receive_input(connection, max_buffer_size))
         if client_input == 1:
-            signup(connection, max_buffer_size)
+            username=signup(connection, max_buffer_size)
             break
         if client_input == 2:
-            login(connection, max_buffer_size)
+            username=login(connection, max_buffer_size)
             break
         if client_input>2 or client_input<1:
             toBePrinted = "Incorrect Choice"
@@ -115,13 +138,13 @@ def menu(connection, max_buffer_size):
         choice = int(receive_input(connection, max_buffer_size))
 
         if(choice==1):
-            listfile()
+            listfile(connection,username)
         if(choice==2):
             uploadfile()
         if(choice==3):
             downloadfile()
         if(choice==4):
-            deletefile()
+            deletefile(connection,max_buffer_size,username)
         if(choice==5):
             sharefile()
         if(choice==6):
