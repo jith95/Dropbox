@@ -94,7 +94,6 @@ def menu(connection, max_buffer_size):
 
     while 1:
         connection.sendall(toBePrinted.encode("utf8"))
-        print(toBePrinted)
         client_input = int(receive_input(connection, max_buffer_size))
         if client_input == 1:
             signup(connection, max_buffer_size)

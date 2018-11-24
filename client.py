@@ -26,15 +26,16 @@ def clientConnect(hostStr, dataPort, cmdPort):
     print (tm.decode("utf8"))
 
     toBePrinted = ''
+    message = ''
     #use getpass function for entering a password
 
 
 
-    while true:
+    while message != 'quit':
         toBePrinted = clientSocket.recv(5120).decode("utf8")
         if (toBePrinted.lower() == 'quit'):
         	break
-        	
+
         print(toBePrinted)
 
         if (toBePrinted == "Enter a password: " or toBePrinted == "Confirm password: " or toBePrinted == "Enter password: "):
@@ -54,6 +55,6 @@ def clientConnect(hostStr, dataPort, cmdPort):
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
 dataPort= input("Enter dataPort : ")
 cmdPort = input("Enter commandPort : ")
-clientConnect('localhost', int(dataPort), int(cmdPort))
+clientConnect(sys.argv[1], int(dataPort), int(cmdPort))
 
 #python client.py 10.1.130.250
