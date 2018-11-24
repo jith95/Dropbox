@@ -25,12 +25,12 @@ def clientConnect(hostStr, dataPort, cmdPort):
     tm = clientSocket.recv(5120)
     print (tm.decode("utf8"))
 
-    message = ''
+    toBePrinted = ''
     #use getpass function for entering a password
 
 
 
-    while message.lower() != 'quit':
+    while toBePrinted.lower() != 'quit':
         toBePrinted = clientSocket.recv(5120).decode("utf8")
         print(toBePrinted)
 
