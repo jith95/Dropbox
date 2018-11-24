@@ -2,49 +2,59 @@
 
 import socket
 import sys
+import getpass
+
 
 def clientConnect(hostStr, dataPort, cmdPort):
 
-	#create socket object
-	clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    #create socket object
+    clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    host = hostStr
+    # Connecting to cmdPort first
+    port = cmdPort
 
-	#host address
-	# host = '10.1.139.91'
+    try:
+        clientSocket.connect((host, port))
+    except:
+        print("Connection error")
+        sys.exit()  
 
-	# port = 5555
+    print("Enter 'quit' to exit")
 
-	host = hostStr
-	# Connecting to cmdPort first
-	port = cmdPort
+    #Receive 5120B of data
+    tm = clientSocket.recv(5120)
+    print (tm.decode("utf8"))
 
-	# clientSocket.connect((host, port))
-	try:
-		clientSocket.connect((host, port))
-	except:
-		print("Connection error")
-		sys.exit()	
+    toBePrinted = ''
+    message = ''
+    #use getpass function for entering a password
 
-	print("Enter 'quit' to exit")
 
-	#Receive 1024 B of data
-	tm = clientSocket.recv(1024)
 
-	print (tm.decode("utf8"))
+    while message != 'quit':
+        toBePrinted = clientSocket.recv(5120).decode("utf8")
+        if (toBePrinted.lower() == 'quit'):
+        	break
 
-	message = input(" -> ")
+        print(toBePrinted)
 
-	while message.lower() != 'quit':
-		clientSocket.sendall(message.encode("utf8"))
-		if clientSocket.recv(5120).decode("utf8") == "-":
-			pass        # null operation
+        if (toBePrinted == "Enter a password: " or toBePrinted == "Confirm password: " or toBePrinted == "Enter password: "):
+            message = getpass.getpass(prompt='')
+        else:
+            message = input()
+        
+        clientSocket.sendall(message.encode("utf8"))
 
-		message = input(" -> ")
-	clientSocket.sendall(message.encode("utf-8"))
-	clientSocket.close()
+    clientSocket.close()
 
+
+
+
+
+# Main Function
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
 dataPort= input("Enter dataPort : ")
 cmdPort = input("Enter commandPort : ")
-clientConnect(str(sys.argv[1]), int(dataPort), int(cmdPort))
+clientConnect(sys.argv[1], int(dataPort), int(cmdPort))
 
 #python client.py 10.1.130.250
