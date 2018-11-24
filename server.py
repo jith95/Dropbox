@@ -9,7 +9,10 @@ from threading import Thread
 import select
 
 
-
+def makeFolder(foldername):
+    if not os.path.exists(foldername):
+        print ("new folder for new user ---- OASIS success")
+        os.makedirs(foldername)
 
 def listfile():
     pass
@@ -52,7 +55,8 @@ def signup(connection, max_buffer_size):
         password2 = receive_input(connection, max_buffer_size) 
 
         if password == password2:
-            d[username]=password            
+            d[username]=password  
+            makeFolder(username)          
             break
         toBePrinted = "Passwords don't match "
         connection.sendall(toBePrinted.encode("utf8"))
