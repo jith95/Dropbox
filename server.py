@@ -154,10 +154,18 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
         #     print("Processed result: {}".format(client_input))
         #     connection.sendall("-".encode("utf8"))    
 
-    menu(connection, max_buffer_size);
+    menu(connection, max_buffer_size)
     print("Client is requesting to quit")
     connection.close()
     print("Connection " + ip + ":" + port + " closed")
+
+    # dump the dictionary into the file
+
+    file = open(r"Users.txt", "w+")
+    for key, val in d.items():
+        file.write(key+" "+val+"\n")
+    file.close()
+
 
 
 
@@ -243,15 +251,5 @@ while True:
     except:
         print("Thread error")
         traceback.print_exc()
-
-
-
-# dump the dictionary into the file
-
-file = open(r"Users.txt", "a+")
-for key, val in d.items():
-    file.write(key+" "+val+"\n")
-file.close()
-
 
     # clientSocket.close()
