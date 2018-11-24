@@ -30,8 +30,11 @@ def clientConnect(hostStr, dataPort, cmdPort):
 
 
 
-    while toBePrinted.lower() != 'quit':
+    while true:
         toBePrinted = clientSocket.recv(5120).decode("utf8")
+        if (toBePrinted.lower() == 'quit'):
+        	break
+        	
         print(toBePrinted)
 
         if (toBePrinted == "Enter a password: " or toBePrinted == "Confirm password: " or toBePrinted == "Enter password: "):

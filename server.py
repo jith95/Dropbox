@@ -124,8 +124,6 @@ def menu(connection, max_buffer_size):
         if(choice==6):
             showlog()
         if(choice==7):
-            toBePrinted = "Thank You "
-            connection.sendall(toBePrinted.encode("utf8"))
             toBePrinted = "quit"
             connection.sendall(toBePrinted.encode("utf8"))
             return 'quit'
@@ -249,11 +247,12 @@ while True:
 
 
 
-#dump the dictionary into the file
+# dump the dictionary into the file
 
-'''file = open(r"Users.txt", "a+")
-file.write(username+" "+password+"\n")
-file.close()'''
+file = open(r"Users.txt", "a+")
+for key, val in d.items():
+    file.write(key+" "+val+"\n")
+file.close()
 
 
     # clientSocket.close()
