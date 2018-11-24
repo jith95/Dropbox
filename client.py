@@ -33,9 +33,9 @@ def clientConnect(hostStr, dataPort, cmdPort):
     while message.lower() != 'quit':
         toBePrinted = clientSocket.recv(5120).decode("utf8")
         print(toBePrinted)
-        
-        if (toBePrinted == "Enter a password: " or toBePrinted == "Confirm password: "):
-            message = getpass.getpass()
+
+        if (toBePrinted == "Enter a password: " or toBePrinted == "Confirm password: " or toBePrinted == "Enter password: "):
+            message = getpass.getpass(prompt='')
         else:
             message = input()
         
