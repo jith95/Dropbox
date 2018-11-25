@@ -5,40 +5,25 @@ import sys
 import getpass
 import os
 
-
 def uploadFileClient(connection, filePath):
 
-    if not os.path.exists(filePath):
-        print ("File does not exists.")
-        return
+    fileSizeAndFileName = str(os.path.getsize(filePath))
+    fileSizeAndFileName += ":"
+    #sendFileName also in same string
+    fileSizeAndFileName += filePath
+    # send file size
+    print("fileSize and fileName: ", fileSizeAndFileName)
+    connection.send(fileSizeAndFileName.encode("utf8"))
 
-    print ("Filename entered 1: ", filePath)
-
-
-    f = open(filePath,'rb')
-    print ("Filename entered 2: ", filePath)
-
-    l = f.read(5120)
-    print ("Filename entered 3: ", filePath)
-
-    while True:
-        while (l):
-           toBePrinted = "sending ."
-           print (toBePrinted, end = '')
-           connection.sendall(toBePrinted.encode("utf8"))  
-           
-           connection.sendall(l)
-           l = f.read(5120)
-
-        # ackMessage = connection.recv(5120).decode("utf8")
-        # if (ackMessage == 'File uploaded successfully'):
-        #     break
-      
-
-    f.close()   # File uploaded successfully
-    print ("Filename entered 4: ", filePath)
-
-
+    status = connection.recv(1024).decode("utf8")
+    if status == 'File Size OK':
+        with open(filePath, 'rb') as f:
+            data = f.read(1024)
+            connection.send(data)
+            
+            while len(data) != 0:
+                data = f.read(1024)
+                connection.send(data)
 
 
 def clientConnect(hostStr, dataPort, cmdPort):
@@ -78,15 +63,16 @@ def clientConnect(hostStr, dataPort, cmdPort):
             toBePrinted == "Confirm password: " or
             toBePrinted == "Enter password: "):
             message = getpass.getpass(prompt='')
+            clientSocket.sendall(message.encode("utf8"))
 
         elif (toBePrinted == "Enter filename (complete path if not in CWD): "):
             message = input()
             uploadFileClient(clientSocket, message)
+
         else:
             message = input()
-        
-        clientSocket.sendall(message.encode("utf8"))
-
+            clientSocket.sendall(message.encode("utf8"))
+       
     clientSocket.close()
 
 

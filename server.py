@@ -18,41 +18,38 @@ def listfile():
     pass
 
 
-def uploadfile(connection, max_buffer_size):
+def uploadfile(connection, max_buffer_size, username, ip):
+    action = "upload"
+
     toBePrinted = "Enter filename (complete path if not in CWD): "
-    connection.sendall(toBePrinted.encode("utf8"))
-    print ("1 Reached Here" )
+    connection.sendall(toBePrinted.encode("utf8"))    
 
-    # while True:
-        # transferComplete = False
-    # print ("2")
+    fileSizeAndFileName = receive_input(connection, max_buffer_size)
 
-    ackMessage = ''
-    while ackMessage != "sending .":
-        ackMessage = receive_input(connection, max_buffer_size)
+    fileSizeNameList = fileSizeAndFileName.split(':')
+    # fileSize is str type
+    print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
 
-    print ("2 Reached Here")
+    # Send OK to indicate ready to receive
+    connection.send('File Size OK'.encode("utf8"))
 
-    with open('received_file', 'wb') as f:
-        print('receiving data .', end = '')
-        while True:
-            print('.', end='')
-            data = connection.recv(max_buffer_size)
-            if not data:
-                # transferComplete = True
-                break
-            # write data to a file
-            f.write(data)
-        # f.close() --  No need to close file explicitly, with does it
-        # if (transferComplete):
-        #     print ("3")
-        #     break
+    fileName = os.path.basename(fileSizeNameList[1])
+    currentPath=os.getcwd()
+    if os.name == 'nt':
+        r= currentPath+'\\'+username+'\\'+fielName
+    else:
+        r= currentPath+'/'+username+'/'+fileName
+    f = open(r, 'wb')
 
-    toBePrinted = 'File uploaded successfully'
-    print (toBePrinted)
-    connection.sendall(toBePrinted.encode("utf8"))
+    data = connection.recv(1024)
+    receivedSize = len(data)
+    f.write(data)
 
-
+    while receivedSize < int(fileSizeNameList[0]):
+        data = connection.recv(1024)
+        receivedSize += len(data)
+        f.write(data)
+    f.close()
 
 def downloadfile():
     pass
@@ -154,7 +151,7 @@ def menu(connection, max_buffer_size):
             listfile()
         if(choice==2):
             print ("Choice 2")
-            uploadfile(connection, max_buffer_size)
+            uploadfile(connection, max_buffer_size, 'user1', ip)
         if(choice==3):
             downloadfile()
         if(choice==4):
