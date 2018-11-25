@@ -58,10 +58,11 @@ def clientConnect(hostStr, dataPort, cmdPort):
 
         print(toBePrinted)
 
-       if (toBePrinted == "Enter a password: " or 
-            toBePrinted == "Confirm password: " or
-            toBePrinted == "Enter password: "):
+        if (toBePrinted == "Enter a password: " or 
+        toBePrinted == "Confirm password: " or
+        toBePrinted == "Enter password: "):
             message = getpass.getpass(prompt='')
+            clientSocket.sendall(message.encode("utf8"))
 
         elif (toBePrinted == "Enter filename (complete path if not in CWD): "):
             message = input()
