@@ -26,17 +26,19 @@ def uploadfile(connection, max_buffer_size, username, ip):
 
     fileSizeAndFileName = receive_input(connection, max_buffer_size)
 
-    fileSizeNameList = fileSizeAndFileName.split(':')
+    fileSizeNameList = fileSizeAndFileName.split(':', 1)
     # fileSize is str type
     print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
 
     # Send OK to indicate ready to receive
     connection.send('File Size OK'.encode("utf8"))
 
+    fileSizeNameList[1] = fileSizeNameList[1].replace('\\','/')
+
     fileName = os.path.basename(fileSizeNameList[1])
     currentPath=os.getcwd()
     if os.name == 'nt':
-        r= currentPath+'\\'+username+'\\'+fielName
+        r= currentPath+'\\'+username+'\\'+fileName
     else:
         r= currentPath+'/'+username+'/'+fileName
     f = open(r, 'wb')
