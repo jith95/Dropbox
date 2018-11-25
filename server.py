@@ -80,7 +80,7 @@ def uploadfile(connection, max_buffer_size, username, ip):
         receivedSize += len(data)
         f.write(data)
     f.close()
-
+    updateLogFile(fileName,username,action,ip)
 
 def downloadfile(connection,filename,username,ip):
     action="download"
