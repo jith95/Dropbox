@@ -44,8 +44,43 @@ def listfile(connection,username):
         toBePrinted = toBePrinted+'\n'+i
     connection.sendall(toBePrinted.encode("utf8"))
 
-def uploadfile():
-    pass
+
+
+def uploadfile(connection, max_buffer_size, username, ip):
+    action = "upload"
+
+    toBePrinted = "Enter filename (complete path if not in CWD): "
+    connection.sendall(toBePrinted.encode("utf8"))    
+
+    fileSizeAndFileName = receive_input(connection, max_buffer_size)
+
+    fileSizeNameList = fileSizeAndFileName.split(':', 1)
+    # fileSize is str type
+    print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
+
+    # Send OK to indicate ready to receive
+    connection.send('File Size OK'.encode("utf8"))
+
+    fileSizeNameList[1] = fileSizeNameList[1].replace('\\','/')
+
+    fileName = os.path.basename(fileSizeNameList[1])
+    currentPath=os.getcwd()
+    if os.name == 'nt':
+        r= currentPath+'\\'+username+'\\'+fileName
+    else:
+        r= currentPath+'/'+username+'/'+fileName
+    f = open(r, 'wb')
+
+    data = connection.recv(1024)
+    receivedSize = len(data)
+    f.write(data)
+
+    while receivedSize < int(fileSizeNameList[0]):
+        data = connection.recv(1024)
+        receivedSize += len(data)
+        f.write(data)
+    f.close()
+
 
 def downloadfile(connection,filename,username,ip):
     action="download"
@@ -197,8 +232,7 @@ def menu(connection, max_buffer_size,ip):
         if(choice==1):
             listfile(connection,username)
         if(choice==2):
-            #uploadfile(connection,filename,username,ip)
-            uploadfile()
+            uploadfile(connection,max_buffer_size,username,ip)
         if(choice==3):
             downloadfile(connection,filename,username,ip)
         if(choice==4):
