@@ -16,8 +16,44 @@ def makeFolder(foldername):
 
 def listfile():
     pass
-def uploadfile():
-    pass
+
+
+def uploadfile(connection, max_buffer_size):
+    toBePrinted = "Enter filename (complete path if not in CWD): "
+    connection.sendall(toBePrinted.encode("utf8"))
+    print ("1 Reached Here" )
+
+    # while True:
+        # transferComplete = False
+    # print ("2")
+
+    ackMessage = ''
+    while ackMessage != "sending .":
+        ackMessage = receive_input(connection, max_buffer_size)
+
+    print ("2 Reached Here")
+
+    with open('received_file', 'wb') as f:
+        print('receiving data .', end = '')
+        while True:
+            print('.', end='')
+            data = connection.recv(max_buffer_size)
+            if not data:
+                # transferComplete = True
+                break
+            # write data to a file
+            f.write(data)
+        # f.close() --  No need to close file explicitly, with does it
+        # if (transferComplete):
+        #     print ("3")
+        #     break
+
+    toBePrinted = 'File uploaded successfully'
+    print (toBePrinted)
+    connection.sendall(toBePrinted.encode("utf8"))
+
+
+
 def downloadfile():
     pass
 def deletefile():
@@ -117,7 +153,8 @@ def menu(connection, max_buffer_size):
         if(choice==1):
             listfile()
         if(choice==2):
-            uploadfile()
+            print ("Choice 2")
+            uploadfile(connection, max_buffer_size)
         if(choice==3):
             downloadfile()
         if(choice==4):
