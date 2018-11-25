@@ -7,24 +7,105 @@ import sys
 import traceback
 from threading import Thread
 import select
+from datetime import date
 
+def updateLogFile(filename,username,action,ip):
+    path=os.getcwd()
+    if os.name == 'nt':
+        r= path+'\\'+username+'\\'+username+'.txt'
+    else:
+        r= path+'/'+username+'/'+username+'.txt'
+    file=open(r,'a+')
+    s = filename + " " + username + " " + action + " " + ip + " " + date.today().strftime("%d %B ' %Y") + "\n"
+    file.write(s)
+    file.close()    
 
-def makeFolder(foldername):
-    if not os.path.exists(foldername):
+def makeLogFile(username):
+    path=os.getcwd()
+    if os.name == 'nt':
+        r= path+'\\'+username+'\\'+username+'.txt'
+    else:
+        r= path+'/'+username+'/'+username+'.txt'
+    file=open(r,'a+')
+    file.close()
+
+def makeFolder(username):
+    if not os.path.exists(username):
         print ("new folder for new user ---- OASIS success")
-        os.makedirs(foldername)
+        os.makedirs(username)
+        makeLogFile(username)
 
-def listfile():
-    pass
+
+def listfile(connection,username):
+    path=os.getcwd()+'\\'+username
+    templist = os.listdir(path)
+    toBePrinted=''
+    for i in templist:
+        toBePrinted = toBePrinted+'\n'+i
+    connection.sendall(toBePrinted.encode("utf8"))
+
 def uploadfile():
     pass
-def downloadfile():
+
+def downloadfile(connection,filename,username,ip):
+    action="download"
+    updateLogFile(filename,username,action,ip)    
     pass
-def deletefile():
+
+def deletefile(connection,max_buffer_size,username,ip):
+    listfile(connection,username)
+    toBePrinted = "Enter file to be deleted: "
+    connection.sendall(toBePrinted.encode("utf8"))
+    filename = receive_input(connection, max_buffer_size)
+    path=os.getcwd()
+    if os.name == 'nt':
+        r= path+'\\'+username+'\\'+filename
+    else:
+        r= path+'/'+username+'/'+filename
+    if os.path.exists(r):
+        os.remove(r)
+        toBePrinted = filename + " Has been deleted"
+        connection.sendall(toBePrinted.encode("utf8"))
+    else:
+        toBePrinted = "File doen't exist "
+        connection.sendall(toBePrinted.encode("utf8"))
+    action="delete"
+    updateLogFile(filename,username,action,ip)    
+
+def sharefile(connection,username,ip,max_buffer_size):
+    listfile(connection,username)
+    path=os.getcwd()
+    toBePrinted = "Enter file to be shared: "
+    connection.sendall(toBePrinted.encode("utf8"))
+    filename = receive_input(connection, max_buffer_size)
+    if os.name == 'nt':
+        source= path+'\\'+username+'\\'+filename
+    else:
+        source= path+'/'+username+'/'+filename
+    toBePrinted = "Enter user you want to share it with: "
+    connection.sendall(toBePrinted.encode("utf8"))
+    path2 = receive_input(connection, max_buffer_size)
+    if os.name == 'nt':
+        dest= path+'\\'+path2+'\\'+filename
+    else:
+        dest= path+'/'+path2+'/'+filename
+    os.symlink(source,dest)
+    action="share"
+    updateLogFile(filename,username,action,ip)    
     pass
-def sharefile():
-    pass
-def showlog():
+
+def showlog(connection,username):
+    path=os.getcwd()
+    if os.name == 'nt':
+        r= path+'\\'+username+'\\'+username+'.txt'
+    else:
+        r= path+'/'+username+'/'+username+'.txt'
+    toBePrinted = "USER FILE ACTION IP DATE  \n" 
+    file=open(r,'r')
+    for i in file:
+        toBePrinted = toBePrinted + i
+    connection.sendall(toBePrinted.encode("utf8"))
+    file.close()    
     pass
 
 
@@ -62,37 +143,36 @@ def signup(connection, max_buffer_size):
         connection.sendall(toBePrinted.encode("utf8"))
 
 
-
+    return username
 
 def login(connection, max_buffer_size):
-        s=0
-        while True:
+    s=0
+    while True:
 
-            toBePrinted = "Enter userid: "
+        toBePrinted = "Enter userid: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        username = receive_input(connection, max_buffer_size) 
+
+        toBePrinted = "Enter password: "
+        connection.sendall(toBePrinted.encode("utf8"))
+        password = receive_input(connection, max_buffer_size)
+
+        for i in d:
+            if i==username and d[i]==password:
+                s=1
+                break
+        if s==1:
+            break    
+        else:
+            toBePrinted = "The userid password combination doesn't match "
             connection.sendall(toBePrinted.encode("utf8"))
-            username = receive_input(connection, max_buffer_size) 
-
-            toBePrinted = "Enter password: "
-            connection.sendall(toBePrinted.encode("utf8"))
-            password = receive_input(connection, max_buffer_size)
-
-            for i in d:
-                if i==username and d[i]==password:
-                    s=1
-                    break
-            if s==1:
-                break    
-            else:
-                toBePrinted = "The userid password combination doesn't match "
-                connection.sendall(toBePrinted.encode("utf8"))
                 
+    return username
 
 
 
 
-
-
-def menu(connection, max_buffer_size):
+def menu(connection, max_buffer_size,ip):
    
     toBePrinted = "Welcome...\n1.Sign up\n2.Sign in\nEnter your choice(1-2): "
 
@@ -100,10 +180,10 @@ def menu(connection, max_buffer_size):
         connection.sendall(toBePrinted.encode("utf8"))
         client_input = int(receive_input(connection, max_buffer_size))
         if client_input == 1:
-            signup(connection, max_buffer_size)
+            username=signup(connection, max_buffer_size)
             break
         if client_input == 2:
-            login(connection, max_buffer_size)
+            username=login(connection, max_buffer_size)
             break
         if client_input>2 or client_input<1:
             toBePrinted = "Incorrect Choice"
@@ -115,17 +195,18 @@ def menu(connection, max_buffer_size):
         choice = int(receive_input(connection, max_buffer_size))
 
         if(choice==1):
-            listfile()
+            listfile(connection,username)
         if(choice==2):
+            #uploadfile(connection,filename,username,ip)
             uploadfile()
         if(choice==3):
-            downloadfile()
+            downloadfile(connection,filename,username,ip)
         if(choice==4):
-            deletefile()
+            deletefile(connection,max_buffer_size,username,ip)
         if(choice==5):
-            sharefile()
+            sharefile(connection,username,ip,max_buffer_size)
         if(choice==6):
-            showlog()
+            showlog(connection,username)
         if(choice==7):
             toBePrinted = "quit"
             connection.sendall(toBePrinted.encode("utf8"))
@@ -158,7 +239,7 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
         #     print("Processed result: {}".format(client_input))
         #     connection.sendall("-".encode("utf8"))    
 
-    menu(connection, max_buffer_size)
+    menu(connection, max_buffer_size,ip)
     print("Client is requesting to quit")
     connection.close()
     print("Connection " + ip + ":" + port + " closed")
