@@ -5,7 +5,7 @@ import sys
 import getpass
 import os
 
-def uploadFileClient(connection, filePath):
+def uploadFileClient(connectionComamnd, connectionData, filePath):
 
     fileSizeAndFileName = str(os.path.getsize(filePath))
     fileSizeAndFileName += ":"
@@ -13,36 +13,44 @@ def uploadFileClient(connection, filePath):
     fileSizeAndFileName += filePath
     # send file size
     print("fileSize and fileName: ", fileSizeAndFileName)
-    connection.send(fileSizeAndFileName.encode("utf8"))
+    connectionComamnd.send(fileSizeAndFileName.encode("utf8"))
 
-    status = connection.recv(1024).decode("utf8")
+    status = connectionComamnd.recv(1024).decode("utf8")
     if status == 'File Size OK':
         with open(filePath, 'rb') as f:
             data = f.read(1024)
-            connection.send(data)
+            connectionData.send(data)
             
             while len(data) != 0:
                 data = f.read(1024)
-                connection.send(data)
+                connectionData.send(data)
+    print ("File uploaded successfully")
 
 def clientConnect(hostStr, dataPort, cmdPort):
 
     #create socket object
-    clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    commandSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    dataSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     host = hostStr
     # Connecting to cmdPort first
     port = cmdPort
-
     try:
-        clientSocket.connect((host, port))
+        commandSocket.connect((host, port))
     except:
-        print("Connection error")
+        print("Connection error : Command Socket")
         sys.exit()  
+
+    port = dataPort
+    try:
+        dataSocket.connect((host, port))
+    except:
+        print("Connection error : Data Socket")
+        sys.exit()
 
     print("Enter 'quit' to exit")
 
     #Receive 5120B of data
-    tm = clientSocket.recv(5120)
+    tm = commandSocket.recv(5120)
     print (tm.decode("utf8"))
 
     toBePrinted = ''
@@ -52,7 +60,7 @@ def clientConnect(hostStr, dataPort, cmdPort):
 
 
     while message != 'quit':
-        toBePrinted = clientSocket.recv(5120).decode("utf8")
+        toBePrinted = commandSocket.recv(5120).decode("utf8")
         if (toBePrinted.lower() == 'quit'):
             break
 
@@ -62,17 +70,18 @@ def clientConnect(hostStr, dataPort, cmdPort):
         toBePrinted == "Confirm password: " or
         toBePrinted == "Enter password: "):
             message = getpass.getpass(prompt='')
-            clientSocket.sendall(message.encode("utf8"))
+            commandSocket.sendall(message.encode("utf8"))
 
         elif (toBePrinted == "Enter filename (complete path if not in CWD): "):
             message = input()
-            uploadFileClient(clientSocket, message)
+            uploadFileClient(commandSocket, dataSocket, message)
 
         else:
             message = input()
-            clientSocket.sendall(message.encode("utf8"))
+            commandSocket.sendall(message.encode("utf8"))
        
-    clientSocket.close()
+    commandSocket.close()
+    dataSocket.close()
 
 
 
