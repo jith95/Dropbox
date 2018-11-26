@@ -294,9 +294,6 @@ def client_thread(connectionCommand, connectionData, ip, port, max_buffer_size =
         file.write(key+" "+val+"\n")
     file.close()
 
-    #Clear ipToDic
-    ipToSocketsDictionary.pop(ip, None)
-
 
 
 
@@ -396,5 +393,8 @@ while True:
     except:
         print("Thread error")
         traceback.print_exc()
+
+    #Clear ipToDic here itself, as more clients to connect from same PC
+    ipToSocketsDictionary.pop(ip, None)    
 
     # clientSocket.close()
