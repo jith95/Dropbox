@@ -12,20 +12,20 @@ from datetime import date
 def updateLogFile(filename,username,action,ip):
     path=os.getcwd()
     if os.name == 'nt':
-        r= path+'\\'+username+'\\'+username+'.txt'
+        r= path+'\\'+'Logs'+'\\'+username+'.txt'
     else:
-        r= path+'/'+username+'/'+username+'.txt'
+        r= path+'/'+'Logs'+'/'+username+'.txt'
     file=open(r,'a+')
-    s = filename + " " + username + " " + action + " " + ip + " " + date.today().strftime("%d %B ' %Y") + "\n"
+    s = filename + " " + username + " " + action + " " + ip + " " + date.today().strftime("%d-%B-%Y") + "\n"
     file.write(s)
-    file.close()    
+    file.close()
 
 def makeLogFile(username):
     path=os.getcwd()
     if os.name == 'nt':
-        r= path+'\\'+username+'\\'+username+'.txt'
+        r= path+'\\'+'Logs'+'\\'+username+'.txt'
     else:
-        r= path+'/'+username+'/'+username+'.txt'
+        r= path+'/'+'Logs'+'/'+username+'.txt'
     file=open(r,'a+')
     file.close()
 
@@ -33,36 +33,35 @@ def makeFolder(username):
     if not os.path.exists(username):
         print ("new folder for new user ---- OASIS success")
         os.makedirs(username)
-        makeLogFile(username)
 
-
-def listfile(connection,username):
-	if os.name=='nt':
-    	path=os.getcwd()+'\\'+username
+def listfile(connection,username, extraString = ''):
+    if os.name=='nt':
+        path=os.getcwd()+'\\'+username
     else:
-    	path = os.getcwd() + '/' + username
+        path = os.getcwd() + '/' + username
     templist = os.listdir(path)
     toBePrinted=''
     for i in templist:
-        toBePrinted = toBePrinted+'\n'+i
+        toBePrinted = toBePrinted+'\n\n'+i
+    toBePrinted += '\n' + extraString
     connection.sendall(toBePrinted.encode("utf8"))
 
 
 
-def uploadfile(connection, max_buffer_size, username, ip):
+def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip):
     action = "upload"
 
     toBePrinted = "Enter filename (complete path if not in CWD): "
-    connection.sendall(toBePrinted.encode("utf8"))    
+    connectionComamnd.sendall(toBePrinted.encode("utf8"))    
 
-    fileSizeAndFileName = receive_input(connection, max_buffer_size)
+    fileSizeAndFileName = receive_input(connectionComamnd, max_buffer_size)
 
     fileSizeNameList = fileSizeAndFileName.split(':', 1)
     # fileSize is str type
     print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
 
     # Send OK to indicate ready to receive
-    connection.send('File Size OK'.encode("utf8"))
+    connectionComamnd.send('File Size OK'.encode("utf8"))
 
     fileSizeNameList[1] = fileSizeNameList[1].replace('\\','/')
 
@@ -74,16 +73,17 @@ def uploadfile(connection, max_buffer_size, username, ip):
         r= currentPath+'/'+username+'/'+fileName
     f = open(r, 'wb')
 
-    data = connection.recv(1024)
+    data = connectionData.recv(1024)
     receivedSize = len(data)
     f.write(data)
 
     while receivedSize < int(fileSizeNameList[0]):
-        data = connection.recv(1024)
+        data = connectionData.recv(1024)
         receivedSize += len(data)
         f.write(data)
     f.close()
     updateLogFile(fileName,username,action,ip)
+    print ("File uploaded successfully")
 
 def downloadfile(connection,filename,username,ip):
     action="download"
@@ -91,9 +91,10 @@ def downloadfile(connection,filename,username,ip):
     pass
 
 def deletefile(connection,max_buffer_size,username,ip):
-    listfile(connection,username)
-    toBePrinted = "Enter file to be deleted: "
-    connection.sendall(toBePrinted.encode("utf8"))
+    extraString = "Enter file to be deleted: "
+    listfile(connection,username, extraString)
+    # toBePrinted = "Enter file to be deleted: "
+    # connection.sendall(toBePrinted.encode("utf8"))
     filename = receive_input(connection, max_buffer_size)
     path=os.getcwd()
     if os.name == 'nt':
@@ -111,40 +112,44 @@ def deletefile(connection,max_buffer_size,username,ip):
     updateLogFile(filename,username,action,ip)    
 
 def sharefile(connection,username,ip,max_buffer_size):
+
+    extraString = "Enter file to be shared: "
     listfile(connection,username)
-    path=os.getcwd()
-    toBePrinted = "Enter file to be shared: "
-    connection.sendall(toBePrinted.encode("utf8"))
     filename = receive_input(connection, max_buffer_size)
+
+    path=os.getcwd()
+    filename = receive_input(connection, max_buffer_size)
+
     if os.name == 'nt':
         source= path+'\\'+username+'\\'+filename
     else:
         source= path+'/'+username+'/'+filename
+
     toBePrinted = "Enter user you want to share it with: "
     connection.sendall(toBePrinted.encode("utf8"))
     path2 = receive_input(connection, max_buffer_size)
+
     if os.name == 'nt':
         dest= path+'\\'+path2+'\\'+filename
     else:
         dest= path+'/'+path2+'/'+filename
+
     os.symlink(source,dest)
     action="share"
-    updateLogFile(filename,username,action,ip)    
-    pass
+    updateLogFile(filename,username,action,ip)
 
 def showlog(connection,username):
     path=os.getcwd()
     if os.name == 'nt':
-        r= path+'\\'+username+'\\'+username+'.txt'
+        r= path+'\\'+'Logs'+'\\'+username+'.txt'
     else:
-        r= path+'/'+username+'/'+username+'.txt'
+        r= path+'/'+'Logs'+'/'+username+'.txt'
     toBePrinted = "USER FILE ACTION IP DATE  \n" 
     file=open(r,'r')
     for i in file:
         toBePrinted = toBePrinted + i
     connection.sendall(toBePrinted.encode("utf8"))
-    file.close()    
-    pass
+    file.close()
 
 
 
@@ -175,7 +180,8 @@ def signup(connection, max_buffer_size):
 
         if password == password2:
             d[username]=password  
-            makeFolder(username)          
+            makeFolder(username)
+            makeLogFile(username)         
             break
         toBePrinted = "Passwords don't match "
         connection.sendall(toBePrinted.encode("utf8"))
@@ -210,47 +216,47 @@ def login(connection, max_buffer_size):
 
 
 
-def menu(connection, max_buffer_size,ip):
+def menu(connectionCommand, connectionData, max_buffer_size,ip):
    
     toBePrinted = "Welcome...\n1.Sign up\n2.Sign in\nEnter your choice(1-2): "
 
     while 1:
-        connection.sendall(toBePrinted.encode("utf8"))
-        client_input = int(receive_input(connection, max_buffer_size))
+        connectionCommand.sendall(toBePrinted.encode("utf8"))
+        client_input = int(receive_input(connectionCommand, max_buffer_size))
         if client_input == 1:
-            username=signup(connection, max_buffer_size)
+            username=signup(connectionCommand, max_buffer_size)
             break
         if client_input == 2:
-            username=login(connection, max_buffer_size)
+            username=login(connectionCommand, max_buffer_size)
             break
         if client_input>2 or client_input<1:
             toBePrinted = "Incorrect Choice"
-            connection.sendall(toBePrinted.encode("utf8"))
+            connectionCommand.sendall(toBePrinted.encode("utf8"))
 
     while 1:
         toBePrinted = "\n1.List files:\n2.Upload Files:\n3.Download files:\n4.Delete files:\n5.Share files:\n6.Show log:\n7.Sign out:\nEnter choice(1-7): "
-        connection.sendall(toBePrinted.encode("utf8"))
-        choice = int(receive_input(connection, max_buffer_size))
+        connectionCommand.sendall(toBePrinted.encode("utf8"))
+        choice = int(receive_input(connectionCommand, max_buffer_size))
 
         if(choice==1):
-            listfile(connection,username)
+            listfile(connectionCommand,username)
         if(choice==2):
-            uploadfile(connection,max_buffer_size,username,ip)
+            uploadfile(connectionCommand, connectionData, max_buffer_size,username,ip)
         if(choice==3):
-            downloadfile(connection,filename,username,ip)
+            downloadfile(connectionCommand, connectionData, filename,username,ip)
         if(choice==4):
-            deletefile(connection,max_buffer_size,username,ip)
+            deletefile(connectionCommand,max_buffer_size,username,ip)
         if(choice==5):
-            sharefile(connection,username,ip,max_buffer_size)
+            sharefile(connectionCommand,username,ip,max_buffer_size)
         if(choice==6):
-            showlog(connection,username)
+            showlog(connectionCommand,username)
         if(choice==7):
             toBePrinted = "quit"
-            connection.sendall(toBePrinted.encode("utf8"))
+            connectionCommand.sendall(toBePrinted.encode("utf8"))
             return 'quit'
         if(choice>7 or choice<1):
             toBePrinted = "Incorrect Choice \n"
-            connection.sendall(toBePrinted.encode("utf8"))
+            connectionCommand.sendall(toBePrinted.encode("utf8"))
 
 
 
@@ -260,7 +266,7 @@ def menu(connection, max_buffer_size,ip):
 
 
 # Thread for every new clinet
-def client_thread(connection, ip, port, max_buffer_size = 5120):
+def client_thread(connectionCommand, connectionData, ip, port, max_buffer_size = 5120):
     # clientActive = True
     # client_input = menu(connection, max_buffer_size)
 
@@ -276,17 +282,21 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
         #     print("Processed result: {}".format(client_input))
         #     connection.sendall("-".encode("utf8"))    
 
-    menu(connection, max_buffer_size,ip)
+    menu(connectionCommand, connectionData,  max_buffer_size,ip)
     print("Client is requesting to quit")
-    connection.close()
+    connectionCommand.close()
+    connectionData.close()
     print("Connection " + ip + ":" + port + " closed")
 
     # dump the dictionary into the file
-
     file = open(r"Users.txt", "w+")
     for key, val in d.items():
         file.write(key+" "+val+"\n")
     file.close()
+
+    #Clear ipToDic
+    ipToSocketsDictionary.pop(ip, None)
+
 
 
 
@@ -326,6 +336,8 @@ with open(r"Users.txt") as f:
        (key, val) = line.split()
        d[key] = val
 
+# Make a folder for Logs
+makeFolder('Logs')
 
 serverSockets = []
 
@@ -350,6 +362,7 @@ serverCmdSocket.bind((host, port))
 serverCmdSocket.listen(4)
 serverSockets.append(serverCmdSocket)
 
+ipToSocketsDictionary = {}
 
 while True:
     # Wait for any sockets to get a hook
@@ -357,19 +370,29 @@ while True:
     ready_server = readable[0]
 
     # establish connection
-    clientSocket, addr = ready_server.accept()
+    socketConnect, addr = ready_server.accept()
+    # dataSocket, addr2 = ready_server.accept()
     ip, port = str(addr[0]), str(addr[1])
-    workingPort = ready_server.getsockname()[1]
+    # workingPort = ready_server.getsockname()[1]
+
+    if ip in ipToSocketsDictionary:
+        ipToSocketsDictionary[ip].append(socketConnect)
+    else:
+        ipToSocketsDictionary[ip] = [socketConnect]
+        continue
 
     print ("Got a connection from : ", str(addr))
     message = "Connected :: "
     currentTime = time.ctime(time.time()) + "\n"
 
     message += currentTime
-    clientSocket.send(message.encode("utf8"))
+    ipToSocketsDictionary[ip][0].send(message.encode("utf8"))
+
+    print ("ipToSocketsDictionary : ", ipToSocketsDictionary)
 
     try:
-        Thread(target=client_thread, args=(clientSocket, ip, port)).start()
+        # First hook will always be on command socket and then on dataSocket
+        Thread(target=client_thread, args=(ipToSocketsDictionary[ip][0], ipToSocketsDictionary[ip][1], ip, port)).start()
     except:
         print("Thread error")
         traceback.print_exc()
