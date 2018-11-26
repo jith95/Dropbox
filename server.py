@@ -16,7 +16,7 @@ def updateLogFile(filename,username,action,ip):
     else:
         r= path+'/'+'Logs'+'/'+username+'.txt'
     file=open(r,'a+')
-    s = filename + " " + username + " " + action + " " + ip + " " + datetime.now() + "\n" 
+    s = filename + " " + username + " " + action + " " + ip + " " + str(datetime.now()) + "\n" 
     file.write(s)
     file.close()
 
@@ -42,8 +42,8 @@ def listfile(connection,username, extraString = ''):
     templist = os.listdir(path)
     toBePrinted=''
     for i in templist:
-        toBePrinted = toBePrinted+'\n\n'+i
-    toBePrinted += '\n' + extraString
+        toBePrinted = toBePrinted+'\n'+i
+    toBePrinted += '\n\n' + extraString
     connection.sendall(toBePrinted.encode("utf8"))
 
 
@@ -125,9 +125,8 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
 def deletefile(connection,max_buffer_size,username,ip):
     extraString = "Enter file to be deleted: "
     listfile(connection,username, extraString)
-    # toBePrinted = "Enter file to be deleted: "
-    # connection.sendall(toBePrinted.encode("utf8"))
     filename = receive_input(connection, max_buffer_size)
+
     path=os.getcwd()
     if os.name == 'nt':
         r= path+'\\'+username+'\\'+filename
@@ -144,14 +143,11 @@ def deletefile(connection,max_buffer_size,username,ip):
     updateLogFile(filename,username,action,ip)    
 
 def sharefile(connection,username,ip,max_buffer_size):
-
     extraString = "Enter file to be shared: "
-    listfile(connection,username)
+    listfile(connection,username, extraString)
     filename = receive_input(connection, max_buffer_size)
 
     path=os.getcwd()
-    filename = receive_input(connection, max_buffer_size)
-
     if os.name == 'nt':
         source= path+'\\'+username+'\\'+filename
     else:
@@ -169,6 +165,9 @@ def sharefile(connection,username,ip,max_buffer_size):
     os.symlink(source,dest)
     action="share"
     updateLogFile(filename,username,action,ip)
+
+    toBePrinted = "File shared successfully"
+    connection.sendall(toBePrinted.encode("utf8"))
 
 def showlog(connection,username):
     path=os.getcwd()

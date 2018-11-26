@@ -37,7 +37,7 @@ def  downloadFileClient(connectionComamnd, connectionData, filePath):
         receivedSize += len(data)
         f.write(data)
     f.close()
-    print(" File downloaded successfully. Return to main menu:")
+    print("File downloaded successfully. Return to main menu:")
 
 def uploadFileClient(connectionComamnd, connectionData, filePath):
 
@@ -113,6 +113,9 @@ def clientConnect(hostStr, dataPort, cmdPort):
         elif "Enter  the name of the file you want to download : " in toBePrinted:
             message = input()
             downloadFileClient(commandSocket, dataSocket, message)
+
+        elif "File shared successfully" in toBePrinted:
+            print ("File shared successfully")
 
         else:
             message = input()
