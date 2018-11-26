@@ -11,6 +11,15 @@ from datetime import datetime
 import uuid
 import hashlib
 
+def hashText(text):
+    salt = uuid.uuid4().hex
+    return hashlib.sha256(salt.encode() + text.encode()).hexdigest() + ':' + salt
+
+def matchHashedText(hashedText, providedText):
+
+    _hashedText, salt = hashedText.split(':')
+    return _hashedText == hashlib.sha256(salt.encode() + providedText.encode()).hexdigest()
+
 def listusers(connection,username):
     toBePrinted='\n'
     for i in d:
@@ -242,7 +251,9 @@ def signup(connection, max_buffer_size):
         password2 = receive_input(connection, max_buffer_size) 
 
         if password == password2:
-            d[username]=password  
+            username2=hashText(username)
+            password2=hashText(password)
+            d[username2]=password2  
             makeFolder(username)
             makeLogFile(username)         
             break
@@ -265,7 +276,7 @@ def login(connection, max_buffer_size):
         password = receive_input(connection, max_buffer_size)
 
         for i in d:
-            if i==username and d[i]==password:
+            if matchHashedText(i,username) and matchHashedText(d[i],password):
                 s=1
                 break
         if s==1:
