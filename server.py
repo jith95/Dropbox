@@ -78,13 +78,16 @@ def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip)
     receivedSize = len(data)
     f.write(data)
 
+    print ("receiving .", end = '')
+
     while receivedSize < int(fileSizeNameList[0]):
+        print (".", end = '')
         data = connectionData.recv(1024)
         receivedSize += len(data)
         f.write(data)
     f.close()
     updateLogFile(fileName,username,action,ip)
-    print ("File uploaded successfully")
+    print ("\nFile uploaded successfully")
 
 
 
@@ -112,14 +115,16 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
         with open(filePath, 'rb') as f:
             data = f.read(1024)
             connectionData.send(data)
+            print ("sending .", end = '')
             
             while len(data) != 0:
+                print (".", end = '')
                 data = f.read(1024)
                 connectionData.send(data)    
 
     action="download"
     updateLogFile(filename,username,action,ip)
-    print ("File downloaded successfully")
+    print ("\nFile downloaded successfully")
 
 
 def deletefile(connection,max_buffer_size,username,ip):

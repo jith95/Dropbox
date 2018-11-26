@@ -32,12 +32,15 @@ def  downloadFileClient(connectionComamnd, connectionData, filePath):
     receivedSize = len(data)
     f.write(data)
 
+    print ("receiving .", end = '')
+
     while receivedSize < int(fileSizeNameList[0]):
+        print (".", end = '')
         data = connectionData.recv(1024)
         receivedSize += len(data)
         f.write(data)
     f.close()
-    print("File downloaded successfully. Return to main menu:")
+    print("\nFile downloaded successfully. Return to main menu:")
 
 def uploadFileClient(connectionComamnd, connectionData, filePath):
 
@@ -54,11 +57,13 @@ def uploadFileClient(connectionComamnd, connectionData, filePath):
         with open(filePath, 'rb') as f:
             data = f.read(1024)
             connectionData.send(data)
-            
+
+            print ("sending .", end = '')         
             while len(data) != 0:
+                print (".", end = '')
                 data = f.read(1024)
                 connectionData.send(data)
-    print ("File uploaded successfully. Return to main menu:")
+    print ("\nFile uploaded successfully. Return to main menu:")
 
 def clientConnect(hostStr, dataPort, cmdPort):
 
@@ -115,6 +120,7 @@ def clientConnect(hostStr, dataPort, cmdPort):
             downloadFileClient(commandSocket, dataSocket, message)
 
         elif "File shared successfully" in toBePrinted:
+            continue
 
         else:
             message = input()
