@@ -37,7 +37,10 @@ def makeFolder(username):
 
 
 def listfile(connection,username):
-    path=os.getcwd()+'\\'+username
+	if os.name=='nt':
+    	path=os.getcwd()+'\\'+username
+    else:
+    	path = os.getcwd() + '/' + username
     templist = os.listdir(path)
     toBePrinted=''
     for i in templist:
