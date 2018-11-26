@@ -81,6 +81,7 @@ def clientConnect(hostStr, dataPort, cmdPort):
             commandSocket.sendall(message.encode("utf8"))
        
     commandSocket.close()
+    dataSocket.close()
 
 
 
