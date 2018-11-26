@@ -8,20 +8,17 @@ import os
 def  downloadFileClient(connectionComamnd, connectionData, filePath):
 
     connectionComamnd.sendall(filePath.encode("utf8"))
-
     fileSizeAndFileName = connectionComamnd.recv(1024).decode("utf8")
 
     fileSizeNameList = fileSizeAndFileName.split(':', 1)
     # fileSize is str type
-    print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
-
     # Send OK to indicate ready to receive
     connectionComamnd.send('File Size OK'.encode("utf8"))
 
     fileSizeNameList[1] = fileSizeNameList[1].replace('\\','/')
 
     filename = os.path.basename(fileSizeNameList[1])
-
+    print("File size and fileName ", fileSizeNameList[0], filename)
     currentPath=os.getcwd()
 
     if os=='nt':
@@ -40,7 +37,6 @@ def  downloadFileClient(connectionComamnd, connectionData, filePath):
         receivedSize += len(data)
         f.write(data)
     f.close()
-
     print(" File downloaded successfully. Return to main menu:")
 
 def uploadFileClient(connectionComamnd, connectionData, filePath):
@@ -62,7 +58,7 @@ def uploadFileClient(connectionComamnd, connectionData, filePath):
             while len(data) != 0:
                 data = f.read(1024)
                 connectionData.send(data)
-    print ("File uploaded successfully")
+    print ("File uploaded successfully. Return to main menu:")
 
 def clientConnect(hostStr, dataPort, cmdPort):
 

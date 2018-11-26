@@ -16,7 +16,7 @@ def updateLogFile(filename,username,action,ip):
     else:
         r= path+'/'+'Logs'+'/'+username+'.txt'
     file=open(r,'a+')
-    s = filename + " " + username + " " + action + " " + ip + " " + date.today().strftime("%d-%B-%Y") + "\n"
+    s = filename + " " + username + " " + action + " " + ip + " " + datetime.now() + "\n" 
     file.write(s)
     file.close()
 
@@ -58,7 +58,6 @@ def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip)
 
     fileSizeNameList = fileSizeAndFileName.split(':', 1)
     # fileSize is str type
-    print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
 
     # Send OK to indicate ready to receive
     connectionComamnd.send('File Size OK'.encode("utf8"))
@@ -66,6 +65,8 @@ def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip)
     fileSizeNameList[1] = fileSizeNameList[1].replace('\\','/')
 
     fileName = os.path.basename(fileSizeNameList[1])
+    print("File size and fileName ", fileSizeNameList[0], fileName)
+
     currentPath=os.getcwd()
     if os.name == 'nt':
         r= currentPath+'\\'+username+'\\'+fileName
@@ -103,11 +104,7 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
     fileSizeAndFileName += filePath
 
     print("File size and File name: ",fileSizeAndFileName)
-
-
     connectionCommand.send(fileSizeAndFileName.encode("utf8"))
-
-
 
     status = receive_input(connectionCommand,max_buffer_size)
 
@@ -122,6 +119,8 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
 
     action="download"
     updateLogFile(filename,username,action,ip)
+    print ("File downloaded successfully")
+
 
 def deletefile(connection,max_buffer_size,username,ip):
     extraString = "Enter file to be deleted: "
