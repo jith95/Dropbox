@@ -193,7 +193,7 @@ def showlog(connection,username):
         r= path+'\\'+'Logs'+'\\'+username+'.txt'
     else:
         r= path+'/'+'Logs'+'/'+username+'.txt'
-    toBePrinted = "USER FILE ACTION IP DATE  \n" 
+    toBePrinted = "FILE USER ACTION IP DATE  \n" 
     file=open(r,'r')
     for i in file:
         toBePrinted = toBePrinted + i
