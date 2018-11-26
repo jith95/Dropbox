@@ -7,7 +7,7 @@ import sys
 import traceback
 from threading import Thread
 import select
-from datetime import date
+from datetime import datetime
 
 def updateLogFile(filename,username,action,ip):
     path=os.getcwd()
