@@ -82,6 +82,6 @@ def clientConnect(hostStr, dataPort, cmdPort):
 print ("\n\n<<<<<<<<<<<<< Welcome to OASIS >>>>>>>>>>>>>\n\n")
 dataPort= input("Enter dataPort : ")
 cmdPort = input("Enter commandPort : ")
-clientConnect('10.1.130.250', int(dataPort), int(cmdPort))
+clientConnect(sys.argv[1], int(dataPort), int(cmdPort))
 
 #python client.py 10.1.130.250
