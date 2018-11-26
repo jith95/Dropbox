@@ -5,6 +5,44 @@ import sys
 import getpass
 import os
 
+def  downloadFileClient(connection,filePath):
+
+    connection.sendall(filePath.encode("utf8"))
+
+    fileSizeAndFileName = connection.recv(1024).decode("utf8")
+
+    fileSizeNameList = fileSizeAndFileName.split(':', 1)
+    # fileSize is str type
+    print("File size and fileName ", fileSizeNameList[0], fileSizeNameList[1])
+
+    # Send OK to indicate ready to receive
+    connection.send('File Size OK'.encode("utf8"))
+
+    fileSizeNameList[1] = fileSizeNameList[1].replace('\\','/')
+
+    filename = os.path.basename(fileSizeNameList[1])
+
+    currentPath=os.getcwd()
+
+    if os=='nt':
+        filePath=currentPath+'\\'+filename
+    else:
+        filePath=currentPath+'/'+filename
+
+    f = open(filePath, 'wb')
+
+    data = connection.recv(1024)
+    receivedSize = len(data)
+    f.write(data)
+
+    while receivedSize < int(fileSizeNameList[0]):
+        data = connection.recv(1024)
+        receivedSize += len(data)
+        f.write(data)
+    f.close()
+
+    print(" File downloaded successfully. Return to main menu:")
+
 def uploadFileClient(connection, filePath):
 
     fileSizeAndFileName = str(os.path.getsize(filePath))
@@ -67,6 +105,10 @@ def clientConnect(hostStr, dataPort, cmdPort):
         elif (toBePrinted == "Enter filename (complete path if not in CWD): "):
             message = input()
             uploadFileClient(clientSocket, message)
+
+        elif "Enter  the name of the file you want to download : " in toBePrinted:
+            message = input()
+            downloadFileClient(clientSocket, message)
 
         else:
             message = input()

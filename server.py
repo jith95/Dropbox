@@ -85,10 +85,42 @@ def uploadfile(connection, max_buffer_size, username, ip):
     f.close()
     updateLogFile(fileName,username,action,ip)
 
-def downloadfile(connection,filename,username,ip):
+def downloadfile(connection,username,ip,max_buffer_size):
+    toBePrinted = "Enter  the name of the file you want to download : "       
+    listfile(connection,username,toBePrinted)
+    filename = receive_input(connection, max_buffer_size) 
+
+    if os=='nt':
+        filePath=os.getcwd()+'\\'+username+'\\'+filename
+    else:
+        filePath=os.getcwd()+'/'+username+'/'+filename
+
+    fileSizeAndFileName = str(os.path.getsize(filePath))
+    fileSizeAndFileName += ":"
+    #sendFileName also in same string
+    fileSizeAndFileName += filePath
+
+    print("File size and File name: ",fileSizeAndFileName)
+
+
+    connection.send(fileSizeAndFileName.encode("utf8"))
+
+
+
+    status = receive_input(connection,max_buffer_size)
+
+    if status == 'File Size OK':
+        with open(filePath, 'rb') as f:
+            data = f.read(1024)
+            connection.send(data)
+            
+            while len(data) != 0:
+                data = f.read(1024)
+                connection.send(data)    
+
     action="download"
     updateLogFile(filename,username,action,ip)    
-    pass
+    
 
 def deletefile(connection,max_buffer_size,username,ip):
     listfile(connection,username)
@@ -237,7 +269,7 @@ def menu(connection, max_buffer_size,ip):
         if(choice==2):
             uploadfile(connection,max_buffer_size,username,ip)
         if(choice==3):
-            downloadfile(connection,filename,username,ip)
+            downloadfile(connection,username,ip,max_buffer_size)
         if(choice==4):
             deletefile(connection,max_buffer_size,username,ip)
         if(choice==5):
