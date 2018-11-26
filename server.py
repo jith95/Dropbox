@@ -8,6 +8,19 @@ import traceback
 from threading import Thread
 import select
 from datetime import datetime
+import uuid
+import hashlib
+
+def listusers(connection,username):
+    toBePrinted='\n'
+    for i in d:
+        if i == username:
+            continue
+        else:
+            toBePrinted+=i+'\n'
+    toBePrinted+="Which user do you want to share the file with: "
+    connection.sendall(toBePrinted.encode("utf8"))
+
 
 def updateLogFile(filename,username,action,ip):
     path=os.getcwd()
@@ -171,8 +184,9 @@ def sharefile(connection,username,ip,max_buffer_size):
     else:
         source= path+'/'+username+'/'+filename
 
-    toBePrinted = "Enter user you want to share it with: "
-    connection.sendall(toBePrinted.encode("utf8"))
+    listusers(connection,username)
+
+
     path2 = receive_input(connection, max_buffer_size)
 
     if os.name == 'nt':
