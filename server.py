@@ -85,10 +85,43 @@ def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip)
     updateLogFile(fileName,username,action,ip)
     print ("File uploaded successfully")
 
-def downloadfile(connection,filename,username,ip):
+
+
+def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_size):
+    toBePrinted = "Enter  the name of the file you want to download : "       
+    listfile(connectionCommand,username,toBePrinted)
+    filename = receive_input(connectionCommand, max_buffer_size) 
+
+    if os=='nt':
+        filePath=os.getcwd()+'\\'+username+'\\'+filename
+    else:
+        filePath=os.getcwd()+'/'+username+'/'+filename
+
+    fileSizeAndFileName = str(os.path.getsize(filePath))
+    fileSizeAndFileName += ":"
+    #sendFileName also in same string
+    fileSizeAndFileName += filePath
+
+    print("File size and File name: ",fileSizeAndFileName)
+
+
+    connectionCommand.send(fileSizeAndFileName.encode("utf8"))
+
+
+
+    status = receive_input(connectionCommand,max_buffer_size)
+
+    if status == 'File Size OK':
+        with open(filePath, 'rb') as f:
+            data = f.read(1024)
+            connectionData.send(data)
+            
+            while len(data) != 0:
+                data = f.read(1024)
+                connectionData.send(data)    
+
     action="download"
-    updateLogFile(filename,username,action,ip)    
-    pass
+    updateLogFile(filename,username,action,ip)
 
 def deletefile(connection,max_buffer_size,username,ip):
     extraString = "Enter file to be deleted: "
@@ -243,7 +276,7 @@ def menu(connectionCommand, connectionData, max_buffer_size,ip):
         if(choice==2):
             uploadfile(connectionCommand, connectionData, max_buffer_size,username,ip)
         if(choice==3):
-            downloadfile(connectionCommand, connectionData, filename,username,ip)
+            downloadfile(connectionCommand, connectionData, username,ip,max_buffer_size)
         if(choice==4):
             deletefile(connectionCommand,max_buffer_size,username,ip)
         if(choice==5):
