@@ -125,7 +125,7 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
             print ("sending .", end = '')
             sys.stdout.flush()
 
-            printStatus = int(int(fileSizeNameList[0])/10)
+            printStatus = int(int(os.path.getsize(filePath))/10)
 
             while len(data) != 0:
                 if (len(data) % printStatus == 0):
