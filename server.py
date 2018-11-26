@@ -79,9 +79,12 @@ def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip)
     f.write(data)
 
     print ("receiving .", end = '')
+    sys.stdout.flush()
 
     while receivedSize < int(fileSizeNameList[0]):
         print (".", end = '')
+        sys.stdout.flush()
+
         data = connectionData.recv(1024)
         receivedSize += len(data)
         f.write(data)
@@ -116,9 +119,12 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
             data = f.read(1024)
             connectionData.send(data)
             print ("sending .", end = '')
+            sys.stdout.flush()
             
             while len(data) != 0:
                 print (".", end = '')
+                sys.stdout.flush()
+
                 data = f.read(1024)
                 connectionData.send(data)    
 

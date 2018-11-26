@@ -33,9 +33,12 @@ def  downloadFileClient(connectionComamnd, connectionData, filePath):
     f.write(data)
 
     print ("receiving .", end = '')
+    sys.stdout.flush()
 
     while receivedSize < int(fileSizeNameList[0]):
         print (".", end = '')
+        sys.stdout.flush()
+
         data = connectionData.recv(1024)
         receivedSize += len(data)
         f.write(data)
@@ -58,9 +61,11 @@ def uploadFileClient(connectionComamnd, connectionData, filePath):
             data = f.read(1024)
             connectionData.send(data)
 
-            print ("sending .", end = '')         
+            print ("sending .", end = '')
+            sys.stdout.flush()
             while len(data) != 0:
                 print (".", end = '')
+                sys.stdout.flush()
                 data = f.read(1024)
                 connectionData.send(data)
     print ("\nFile uploaded successfully. Return to main menu:")
