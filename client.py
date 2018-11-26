@@ -115,7 +115,6 @@ def clientConnect(hostStr, dataPort, cmdPort):
             downloadFileClient(commandSocket, dataSocket, message)
 
         elif "File shared successfully" in toBePrinted:
-            print ("File shared successfully")
 
         else:
             message = input()
