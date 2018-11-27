@@ -8,6 +8,28 @@ import traceback
 from threading import Thread
 import select
 from datetime import datetime
+import uuid
+import hashlib
+
+def hashText(text):
+    salt = uuid.uuid4().hex
+    return hashlib.sha256(salt.encode() + text.encode()).hexdigest() + ':' + salt
+
+def matchHashedText(hashedText, providedText):
+
+    _hashedText, salt = hashedText.split(':')
+    return _hashedText == hashlib.sha256(salt.encode() + providedText.encode()).hexdigest()
+
+def listusers(connection,username):
+    toBePrinted='\nUSERS:\n'
+    for i in d:
+        if i == username:
+            continue
+        else:
+            toBePrinted+=i+'\n'
+    toBePrinted+="Which user do you want to share the file with: "
+    connection.sendall(toBePrinted.encode("utf8"))
+
 
 def updateLogFile(filename,username,action,ip):
     path=os.getcwd()
@@ -40,7 +62,7 @@ def listfile(connection,username, extraString = ''):
     else:
         path = os.getcwd() + '/' + username
     templist = os.listdir(path)
-    toBePrinted=''
+    toBePrinted='\nFILES:\n'
     for i in templist:
         toBePrinted = toBePrinted+'\n'+i
     toBePrinted += '\n\n' + extraString
@@ -81,14 +103,7 @@ def uploadfile(connectionComamnd, connectionData, max_buffer_size, username, ip)
     print ("receiving .", end = '')
     sys.stdout.flush()
 
-    printStatus = int(int(fileSizeNameList[0])/10)
-
     while receivedSize < int(fileSizeNameList[0]):
-        
-        if (receivedSize % printStatus == 0):
-            print (".", end = '')
-            sys.stdout.flush()
-
         data = connectionData.recv(1024)
         receivedSize += len(data)
         f.write(data)
@@ -125,13 +140,7 @@ def downloadfile(connectionCommand, connectionData, username, ip, max_buffer_siz
             print ("sending .", end = '')
             sys.stdout.flush()
 
-            printStatus = int(int(os.path.getsize(filePath))/10)
-
             while len(data) != 0:
-                if (len(data) % printStatus == 0):
-                    print (".", end = '')
-                    sys.stdout.flush()
-
                 data = f.read(1024)
                 connectionData.send(data)    
 
@@ -171,8 +180,9 @@ def sharefile(connection,username,ip,max_buffer_size):
     else:
         source= path+'/'+username+'/'+filename
 
-    toBePrinted = "Enter user you want to share it with: "
-    connection.sendall(toBePrinted.encode("utf8"))
+    listusers(connection,username)
+
+
     path2 = receive_input(connection, max_buffer_size)
 
     if os.name == 'nt':
@@ -228,7 +238,8 @@ def signup(connection, max_buffer_size):
         password2 = receive_input(connection, max_buffer_size) 
 
         if password == password2:
-            d[username]=password  
+            password2=hashText(password)
+            d[username]=password2  
             makeFolder(username)
             makeLogFile(username)         
             break
@@ -251,7 +262,7 @@ def login(connection, max_buffer_size):
         password = receive_input(connection, max_buffer_size)
 
         for i in d:
-            if i==username and d[i]==password:
+            if i==username and matchHashedText(d[i],password):
                 s=1
                 break
         if s==1:
