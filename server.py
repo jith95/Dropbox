@@ -21,7 +21,7 @@ def matchHashedText(hashedText, providedText):
     return _hashedText == hashlib.sha256(salt.encode() + providedText.encode()).hexdigest()
 
 def listusers(connection,username):
-    toBePrinted='\n'
+    toBePrinted='\nUSERS:\n'
     for i in d:
         if i == username:
             continue
@@ -62,7 +62,7 @@ def listfile(connection,username, extraString = ''):
     else:
         path = os.getcwd() + '/' + username
     templist = os.listdir(path)
-    toBePrinted=''
+    toBePrinted='\nFILES:\n'
     for i in templist:
         toBePrinted = toBePrinted+'\n'+i
     toBePrinted += '\n\n' + extraString
@@ -251,9 +251,8 @@ def signup(connection, max_buffer_size):
         password2 = receive_input(connection, max_buffer_size) 
 
         if password == password2:
-            username2=hashText(username)
             password2=hashText(password)
-            d[username2]=password2  
+            d[username]=password2  
             makeFolder(username)
             makeLogFile(username)         
             break
@@ -276,7 +275,7 @@ def login(connection, max_buffer_size):
         password = receive_input(connection, max_buffer_size)
 
         for i in d:
-            if matchHashedText(i,username) and matchHashedText(d[i],password):
+            if i==username and matchHashedText(d[i],password):
                 s=1
                 break
         if s==1:
